@@ -11,7 +11,7 @@ import random
 
 # globals for user interface
 WIDTH = 1000
-HEIGHT = 800
+HEIGHT = 700
 score = 0
 lives = 3
 time = 0.0
@@ -24,6 +24,8 @@ ROCK_LIMIT = 12
 TIME = 0.7
 started = False
 explosion_group = set([])
+highest_score = 0
+last_score = 0
 
 
 class ImageInfo:
@@ -315,10 +317,16 @@ def draw(canvas):
     
     ### check if lives are left are 0
     if lives == 0:
-         started = False
+        global last_score
+        if started == True:
+            last_score = score
+        started = False
             
     
     if not started:
+        global highest_score
+        if last_score > highest_score:
+            highest_score = last_score
         lives = 3
         score = 0
         rock_group = set([])
@@ -330,6 +338,22 @@ def draw(canvas):
         canvas.draw_image(splash_image, splash_info.get_center(), 
                           splash_info.get_size(), [WIDTH / 2, HEIGHT / 2], 
                           splash_info.get_size())
+        ### print score
+        point = ([WIDTH / 2 - 120 , HEIGHT / 2 + 100]) 
+        text_size = 25
+        color = "Magenta"    
+        canvas.draw_text("Last Score ", point, text_size, color)
+        point = ([WIDTH / 2 + 110 , HEIGHT / 2 + 100 ] )
+        color = "Lime"
+        canvas.draw_text(str(last_score), point, text_size, color)
+        
+        point = ([WIDTH / 2 - 120 , HEIGHT / 2 + 130]) 
+        text_size = 25
+        color = "Magenta"    
+        canvas.draw_text("Highest Score ", point, text_size, color)
+        point = ([WIDTH / 2 + 110 , HEIGHT / 2 + 130 ] )
+        color = "Lime" 
+        canvas.draw_text(str(highest_score), point, text_size, color)
     
     if started:
     
@@ -375,13 +399,14 @@ def rock_spawner():
     width = random.randint(0,WIDTH)
     height = random.randint(0,HEIGHT)
     ## makw sure rock is not too close
-    while ( ship_pos[0] - 50 <= width <= ship_pos[0] + 50) or ( ship_pos[1] - 50 <= height <= ship_pos[1] + 50): 
+    while ( ship_pos[0] - 10 <= width <= ship_pos[0] + 10) or ( ship_pos[1] - 10 <= height <= ship_pos[1] + 10): 
         width = random.randint(0,WIDTH)
         height = random.randint(0,HEIGHT)
     ang_vel = random.random()/2
     if ang_vel > random.random()/4:
         ang_vel = random.random()/4 - ang_vel 
     if len(rock_group) < ROCK_LIMIT: 
+        rock_vel = [(random.randint(0, 20)-10)/5, (random.randint(0, 20)-10)/5]
         rock_group.add(Sprite([width, height], rock_vel, 0, ang_vel, asteroid_image, asteroid_info))
 
         
@@ -389,7 +414,7 @@ def rock_spawner():
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
-rock_vel = random.random() - 0.5, random.random() - 0.5
+rock_vel = [(random.randint(0, 20)-10)/5, (random.randint(0, 20)-10)/5]
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info, ship_thrust_sound)
 rock_group.add(Sprite([WIDTH / 3, HEIGHT / 3], rock_vel, 0, 0, asteroid_image, asteroid_info))
 missile_group.add(Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [0,0], 0, 0, missile_image, missile_info, missile_sound))
